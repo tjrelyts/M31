@@ -12,13 +12,19 @@ public class Particle {
     private double radius;
     private Color bodyColor;
 
+    private static final double RADIUS_SCALE_FACTOR = 2;
+
     public Particle(Builder builder) {
         this.mass = builder.mass;
         this.position = builder.position;
         this.velocity = builder.velocity;
         this.acceleration = builder.acceleration;
-        this.radius = builder.radius;
+        this.radius = calculateRadiusFromMass(builder.mass);
         this.bodyColor = builder.bodyColor;
+    }
+
+    private double calculateRadiusFromMass(double mass) {
+        return RADIUS_SCALE_FACTOR * Math.cbrt(mass);
     }
 
     public static class Builder {
@@ -29,8 +35,7 @@ public class Particle {
         private Color bodyColor = Color.WHITE;
         private Vector2D velocity = new Vector2D(0, 0);
         private Vector2D acceleration = new Vector2D(0, 0);
-        private double radius = 5.0;
-        
+
         public Builder(double mass, Vector2D position) {
             this.mass = mass;
             this.position = position;
@@ -46,11 +51,6 @@ public class Particle {
             return this;
         }
         
-        public Builder radius(double radius) {
-            this.radius = radius;
-            return this;
-        }
-
         public Builder bodyColor(Color bodyColor) {
             this.bodyColor = bodyColor;
             return this;
@@ -72,4 +72,13 @@ public class Particle {
     public void setVelocity(Vector2D velocity) { this.velocity = velocity; }
     public void setAcceleration(Vector2D acceleration) { this.acceleration = acceleration; }
 
+    public void absorbMass(double amount) {
+        this.mass += amount;
+        this.radius = calculateRadiusFromMass(this.mass);
+    }
+
+    public void loseMass(double amount) {
+        this.mass = Math.max(0, this.mass - amount);
+        this.radius = calculateRadiusFromMass(this.mass);
+    }
 }
